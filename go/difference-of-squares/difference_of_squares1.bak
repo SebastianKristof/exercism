@@ -1,0 +1,54 @@
+package diffsquares
+
+// func SquareOfSum(n int) (sqs int) {
+// 	for i := 1; i <= n; i++ {
+// 		sqs = sqs + i
+// 	}
+// 	sqs = sqs * sqs
+// 	return
+// }
+
+// func SumOfSquares(n int) (ssq int) {
+// 	for i := 1; i <= n; i++ {
+// 		ssq += i * i
+// 	}
+// 	return
+// }
+var resCh = make(chan int)
+
+func Difference(n int) int {
+
+	var sqs, ssq int
+
+	go func() {
+		for i := 1; i <= n; i++ {
+			sqs = sqs + i
+		}
+		sqs = sqs * sqs
+		resCh <- sqs
+	}()
+
+	go func() {
+		for i := 1; i <= n; i++ {
+			ssq += i * i
+		}
+		resCh <- ssq
+	}()
+
+	var sqsRes, ssqRes int
+	ssqRes = <-resCh
+	sqsRes = <-resCh
+	// for {
+	// 	select {
+	// 	case sqsRes = <-sqsCh:
+	// 	case ssqRes = <-ssqCh:
+	// 	default:
+	// 	}
+	// 	if sqsRes > 0 && ssqRes > 0 {
+	// 		break
+	// 	}
+	// }
+
+	return sqsRes - ssqRes
+
+}

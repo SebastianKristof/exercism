@@ -49,6 +49,6 @@ func BenchmarkSumOfSquares(b *testing.B) {
 
 func BenchmarkDifference(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Difference(100)
+		Difference(10000)
 	}
 }

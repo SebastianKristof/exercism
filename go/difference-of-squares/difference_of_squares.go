@@ -9,9 +9,10 @@ func SquareOfSum(n int) (sqs int) {
 }
 
 func SumOfSquares(n int) (ssq int) {
-	for i := 1; i <= n; i++ {
-		ssq += i * i
-	}
+	// for i := 1; i <= n; i++ {
+	// 	ssq += i * i
+	// }
+	ssq = n * (n + 1) * (2*n + 1) / 6
 	return
 }
 
