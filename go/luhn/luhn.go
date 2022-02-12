@@ -3,17 +3,18 @@ package luhn
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"unicode"
 )
 
-func Valid(id string) bool {
-	id, err := checkAndStrip(id)
+func Valid(cleanID string) bool {
+	cleanID, err := checkAndStrip(cleanID)
 	if err != nil {
 		log.Printf("incorrect number: %s", err)
 		return false
 	}
 
-	valid := validate(id)
+	valid := validate(cleanID)
 	if !valid {
 		return false
 	}
@@ -22,44 +23,63 @@ func Valid(id string) bool {
 }
 
 func checkAndStrip(id string) (string, error) {
-	var resRunes []rune
-	for _, r := range []rune(id) {
+	var runesID []rune
+	for _, r := range id {
 		if r == ' ' {
 			continue
 		}
 		if unicode.IsDigit(r) {
-			resRunes = append(resRunes, r)
+			runesID = append(runesID, r)
 			continue
 		}
-		return string(r), fmt.Errorf("invalid character: %c", r)
+		return "", fmt.Errorf("invalid character: %c", r)
 	}
 
-	return string(resRunes), nil
+	return string(runesID), nil
 }
 
-func validate(id string) bool {
-	if len(id) <= 1 {
+func validate(cleanID string) bool {
+	if len(cleanID) <= 1 {
 		return false
 	}
 
-	// double every 2nd digit starting from the right, subtract 9 if greater than 9
-	idRunes := []rune(id)
-	idLen := len(idRunes)
-	for i := 0; i < idLen; i++ {
-		currentIndex := idLen - i - 1
-		if i%2 != 0 {
-			d := (int(idRunes[currentIndex]) - '0') * 2
-			if d > 9 {
-				d -= 9
-			}
-			idRunes[currentIndex] = []rune(fmt.Sprint(d))[0]
-		}
-	}
+	// convert string to slice of integer digits, ignore error because the string is already checked
+	numbers, _ := strToIntSlice(cleanID)
+
+	// multiply according to Luhn algorithm
+	multiplyForLuhn(numbers)
 
 	var sum int
-	for _, d := range idRunes {
-		sum += (int(d) - '0')
+	for _, d := range numbers {
+		sum += d
 	}
 
 	return sum%10 == 0
+}
+
+func strToIntSlice(id string) ([]int, error) {
+	var numbers []int
+	for _, char := range id {
+		n, err := strconv.Atoi(string(char))
+		if err != nil {
+			return nil, err
+		}
+
+		numbers = append(numbers, n)
+	}
+	return numbers, nil
+}
+
+func multiplyForLuhn(numbers []int) {
+	// double every 2nd digit starting from the right, subtract 9 if greater than 9
+	for i := 0; i < len(numbers); i++ {
+		currentIndex := len(numbers) - 1 - i // going from last to first
+		if i%2 != 0 {
+			d := numbers[currentIndex] * 2
+			if d > 9 {
+				d -= 9
+			}
+			numbers[currentIndex] = d
+		}
+	}
 }
